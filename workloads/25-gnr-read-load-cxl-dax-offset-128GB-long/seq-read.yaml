@@ -10,4 +10,4 @@ seq-read:
     memory_region_size: 16G
     run_time: 86400
     generate_read_data: false
-    region_offset: 0
+    region_offset: 128G

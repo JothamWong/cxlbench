@@ -18,31 +18,39 @@ fi
 echo "Branch to checkout on remote servers: ${BRANCH} (this repository's branch)"
 
 # EMR
-USER_HOST1="tester@192.168.25.86"
+USER_HOST1="jotham@192.168.128.73"
 
 # GNR
-USER_HOST2="tester@192.168.25.85"
+USER_HOST2="jotham@192.168.128.74"
 
 # Per configuration tuple: <main workload>:<background workload>:<start delay both workload>:<finish background workload strategy>
 configurations=(
-# Lat
-  "25-emr-lat-cxl-dax:none:0:wait:${USER_HOST1}:${USER_HOST2}"
-  "25-emr-lat-cxl-dax:25-gnr-read-load-cxl-dax-offset-0-long:60:kill:${USER_HOST1}:${USER_HOST2}"
-  # TODO(MW) also add 512GB-long workload
-#  "25-emr-lat-cxl-dax:25-gnr-read-load-cxl-dax-offset-512GB:60:kill:${USER_HOST1}:${USER_HOST2}"
-#  "25-gnr-lat-cxl-dax:none:60:wait:${USER_HOST2}:${USER_HOST1}"
-#  "25-gnr-lat-cxl-dax:25-emr-read-load-cxl-dax-offset-0:60:kill:${USER_HOST2}:${USER_HOST1}"
-#  "25-gnr-lat-cxl-dax:25-emr-read-load-cxl-dax-offset-512GB:60:kill:${USER_HOST2}:${USER_HOST1}"
-# BW
-#  "25-emr-bw-cxl-dax:none:10:wait:${USER_HOST1}:${USER_HOST2}"
-#  "25-emr-bw-cxl-dax:25-gnr-read-load-cxl-dax-offset-0:10:wait:${USER_HOST1}:${USER_HOST2}"
-#  "25-emr-bw-cxl-dax:25-gnr-read-load-cxl-dax-offset-512GB:10:wait:${USER_HOST1}:${USER_HOST2}"
-#  "25-gnr-bw-cxl-dax:none:10:wait:${USER_HOST2}:${USER_HOST1}"
-#  "25-gnr-bw-cxl-dax:25-emr-read-load-cxl-dax-offset-0:10:wait:${USER_HOST2}:${USER_HOST1}"
-#  "25-gnr-bw-cxl-dax:25-emr-read-load-cxl-dax-offset-512GB:10:wait:${USER_HOST2}:${USER_HOST1}"
+  # EMR write offset 0 vs GNR read offset 0, 128G, 256G, 384G
+  "25-emr-write-cxl-dax-offset-0:25-gnr-read-load-cxl-dax-offset-0-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-0:25-gnr-read-load-cxl-dax-offset-128GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-0:25-gnr-read-load-cxl-dax-offset-256GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-0:25-gnr-read-load-cxl-dax-offset-384GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+
+  # EMR write offset 128GB vs GNR read offset 0, 128G, 256G, 384G
+  "25-emr-write-cxl-dax-offset-128GB:25-gnr-read-load-cxl-dax-offset-0-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-128GB:25-gnr-read-load-cxl-dax-offset-128GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-128GB:25-gnr-read-load-cxl-dax-offset-256GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-128GB:25-gnr-read-load-cxl-dax-offset-384GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+
+  # EMR write offset 256GB vs GNR read offset 0, 128G, 256G, 384G
+  "25-emr-write-cxl-dax-offset-256GB:25-gnr-read-load-cxl-dax-offset-0-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-256GB:25-gnr-read-load-cxl-dax-offset-128GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-256GB:25-gnr-read-load-cxl-dax-offset-256GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-256GB:25-gnr-read-load-cxl-dax-offset-384GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+
+  # EMR write offset 384GB vs GNR read offset 0, 128G, 256G, 384G
+  "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-0-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-128GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-256GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-384GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
 )
 
-REPO_URL="git@github.com:mweisgut/cxlbench.git"
+REPO_URL="https://github.com/JothamWong/cxlbench.git"
 TARGET_DIR="cxlbench-multiserver"
 
 USER_HOSTS=($USER_HOST1 $USER_HOST2)
@@ -156,6 +164,21 @@ for config in "${configurations[@]}"; do
       echo "Unknown mode for deadling with background workload: ${bw_mode}"
       exit 1
     fi
+  fi
+
+  echo "Retrieving results..."
+  local_results_dir="./results"
+  host_main_name=$(echo "${user_host_main}" | cut -d'@' -f2)
+  host_bg_name=$(echo "${user_host_background}" | cut -d'@' -f2)
+
+  if [[ "$workload" != "none" ]]; then
+    mkdir -p "${local_results_dir}/${host_main_name}/${workload}_${background_workload}/$START_TIME"
+    rsync -avz "${user_host_main}:${RESULT_DIRS[0]}/" "${local_results_dir}/${host_main_name}/${workload}_${background_workload}/$START_TIME/"
+  fi
+
+  if [[ "$background_workload" != "none" ]]; then
+    mkdir -p "${local_results_dir}/${host_bg_name}/${workload}_${background_workload}/$START_TIME"
+    rsync -avz "${user_host_background}:${RESULT_DIRS[1]}/" "${local_results_dir}/${host_bg_name}/${workload}_${background_workload}/$START_TIME/"
   fi
 done
 
