@@ -48,6 +48,12 @@ configurations=(
   "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-128GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
   "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-256GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
   "25-emr-write-cxl-dax-offset-384GB:25-gnr-read-load-cxl-dax-offset-384GB-long:60:kill:${USER_HOST1}:${USER_HOST2}"
+
+  # Uninterfered workloads (no background workload)
+  "25-emr-write-cxl-dax-offset-0:none:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-128GB:none:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-256GB:none:60:kill:${USER_HOST1}:${USER_HOST2}"
+  "25-emr-write-cxl-dax-offset-384GB:none:60:kill:${USER_HOST1}:${USER_HOST2}"
 )
 
 REPO_URL="https://github.com/JothamWong/cxlbench.git"
