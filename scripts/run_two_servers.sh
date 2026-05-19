@@ -62,7 +62,7 @@ CLONE_CMD="if [ ! -d \"$TARGET_DIR\" ]; then git clone $REPO_URL $TARGET_DIR; el
 for (( i=0; i<$NUM_HOSTS; i++)); do
   USER_HOST="${USER_HOSTS[$i]}"
   echo "Delete dir ($USER_HOST)"
-  ssh -A ${USER_HOST} "rm -rf ~/$TARGET_DIR" &
+  ssh ${USER_HOST} "rm -rf ~/$TARGET_DIR" &
 done
 wait
 echo "Delete done"
@@ -71,7 +71,7 @@ echo "Delete done"
 for (( i=0; i<$NUM_HOSTS; i++)); do
   USER_HOST="${USER_HOSTS[$i]}"
   echo "Setup ($USER_HOST)"
-  ssh -A ${USER_HOST} "$CLONE_CMD" &
+  ssh ${USER_HOST} "$CLONE_CMD" &
 done
 wait
 echo "Clone done"
@@ -80,7 +80,7 @@ echo "Clone done"
 for (( i=0; i<$NUM_HOSTS; i++)); do
   USER_HOST="${USER_HOSTS[$i]}"
   echo "Build ($USER_HOST)"
-  ssh -A ${USER_HOST} "cd $TARGET_DIR && git checkout "$BRANCH" && ./scripts/build.sh $BUILD_DIR_NAME" &
+  ssh ${USER_HOST} "cd $TARGET_DIR && git checkout "$BRANCH" && ./scripts/build.sh $BUILD_DIR_NAME" &
 done
 wait
 echo "Build done"
@@ -103,12 +103,12 @@ for config in "${configurations[@]}"; do
 
   # Prepare workloads and create result dirs
   if [[ "$workload" != "none" ]]; then
-    ssh -A ${user_host_main} "cd $TARGET_DIR/$BUILD_DIR_NAME && ../scripts/reset_workload.sh $workload" \
+    ssh ${user_host_main} "cd $TARGET_DIR/$BUILD_DIR_NAME && ../scripts/reset_workload.sh $workload" \
       "&& mkdir -p ${RESULT_DIRS[0]}" &
   fi
 
   if [[ "$background_workload" != "none" ]]; then
-    ssh -A ${user_host_background} "cd $TARGET_DIR/$BUILD_DIR_NAME && ../scripts/reset_workload.sh $background_workload" \
+    ssh ${user_host_background} "cd $TARGET_DIR/$BUILD_DIR_NAME && ../scripts/reset_workload.sh $background_workload" \
       "&& mkdir -p ${RESULT_DIRS[1]}" &
   fi
   wait
@@ -126,7 +126,7 @@ for config in "${configurations[@]}"; do
 
   if [[ "$background_workload" != "none" ]]; then
     echo "Running load generating background workload"
-    BACKGROUND_WORKLOAD_PID=$(ssh -A "${user_host_background}" "
+    BACKGROUND_WORKLOAD_PID=$(ssh "${user_host_background}" "
       cd $TARGET_DIR/$BUILD_DIR_NAME && \
       { ./cxlbench -r ${RESULT_DIRS[1]} -s $start_timestamp_ms -d ${start_delay} > ${LOG_FILES[1]} 2>&1 & echo \$!; }
     ")
@@ -138,7 +138,7 @@ for config in "${configurations[@]}"; do
   if [[ "$workload" != "none" ]]; then
     echo "Running main workload"
     echo "${RESULT_DIRS[0]}"
-    WORKLOAD_PID=$(ssh -A ${user_host_main} "
+    WORKLOAD_PID=$(ssh ${user_host_main} "
       cd $TARGET_DIR/$BUILD_DIR_NAME && \
       { ./cxlbench -r ${RESULT_DIRS[0]} -s $start_timestamp_ms -d ${start_delay} > ${LOG_FILES[0]} 2>&1 & echo \$!; }
     ")
@@ -154,7 +154,7 @@ for config in "${configurations[@]}"; do
   if [[ -n "$BACKGROUND_WORKLOAD_PID" ]]; then
     if [[ "$bg_mode" == "kill" ]]; then
       # Kill load workload
-      ssh -A "${user_host_background}" "kill -9 $BACKGROUND_WORKLOAD_PID 2>/dev/null"
+      ssh "${user_host_background}" "kill -9 $BACKGROUND_WORKLOAD_PID 2>/dev/null"
       echo "Killed background workload"
     elif [[ "$bg_mode" == "wait" ]]; then
       # Wait for completion of background workload
@@ -184,14 +184,14 @@ done
 
 cleanup() {
   if [[ -n "$BACKGROUND_WORKLOAD_PID" ]]; then
-    ssh -A "${USER_HOST2}" "kill -9 $BACKGROUND_WORKLOAD_PID 2>/dev/null"
+    ssh "${USER_HOST2}" "kill -9 $BACKGROUND_WORKLOAD_PID 2>/dev/null"
   fi
 
   if [[ -n "$WORKLOAD_PID" ]]; then
-    ssh -A "${USER_HOST1}" "kill -9 $WORKLOAD_PID 2>/dev/null"
+    ssh "${USER_HOST1}" "kill -9 $WORKLOAD_PID 2>/dev/null"
   fi
 
-  ssh -A "${USER_HOST1}"
+  ssh "${USER_HOST1}"
 }
 
 trap cleanup SIGINT SIGTERM EXIT
